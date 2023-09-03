@@ -16,6 +16,7 @@ const axiosInstance: AxiosInstance = axios.create({
 })
 
 axiosInstance.interceptors.request.use((res: InternalAxiosRequestConfig) => {
+  console.log('request res', res)
   const controller = new AbortController()
   const url = res.url || ''
   res.signal = controller.signal
@@ -25,9 +26,10 @@ axiosInstance.interceptors.request.use((res: InternalAxiosRequestConfig) => {
 
 axiosInstance.interceptors.response.use(
   (res: AxiosResponse) => {
+    console.log('response res', res)
     const url = res.config.url || ''
     abortControllerMap.delete(url)
-    return res.data
+    return res
   },
   (err: any) => err
 )

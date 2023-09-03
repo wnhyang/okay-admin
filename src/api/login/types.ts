@@ -1,5 +1,5 @@
-export type UserLoginType = {
-  username: string
+export type UserLoginVO = {
+  account: string
   password: string
 }
 

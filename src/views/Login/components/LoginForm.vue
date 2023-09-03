@@ -10,9 +10,10 @@ import { useAppStore } from '@/store/modules/app'
 import { usePermissionStore } from '@/store/modules/permission'
 import { useRouter } from 'vue-router'
 import type { RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router'
-import { UserType } from '@/api/login/types'
+import { UserLoginVO, UserType } from '@/api/login/types'
 import { useValidator } from '@/hooks/web/useValidator'
 import { Icon } from '@/components/Icon'
+import {setToken} from "@/utils/auth";
 
 const { required } = useValidator()
 
@@ -29,7 +30,7 @@ const { setStorage } = useStorage()
 const { t } = useI18n()
 
 const rules = {
-  username: [required()],
+  account: [required()],
   password: [required()]
 }
 
@@ -48,7 +49,7 @@ const schema = reactive<FormSchema[]>([
     }
   },
   {
-    field: 'username',
+    field: 'account',
     label: t('login.username'),
     value: 'admin',
     component: 'Input',
@@ -216,12 +217,15 @@ const signIn = async () => {
   await formRef?.validate(async (isValid) => {
     if (isValid) {
       loading.value = true
-      const formData = await getFormData<UserType>()
+      const formData = await getFormData<UserLoginVO>()
+      console.log('formData', formData)
 
       try {
         const res = await loginApi(formData)
 
         if (res) {
+          console.log(res)
+          setToken(res.data)
           setStorage(appStore.getUserInfo, res.data)
           // 是否使用动态路由
           if (appStore.getDynamicRouter) {

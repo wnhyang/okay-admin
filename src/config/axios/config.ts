@@ -55,7 +55,7 @@ const config: AxiosConfig = {
 }
 
 const defaultRequestInterceptors = (config: InternalAxiosRequestConfig) => {
-  console.log(config)
+  console.log('request config', config)
   if (
     config.method === 'post' &&
     (config.headers as AxiosRequestHeaders)['Content-Type'] === 'application/x-www-form-urlencoded'
@@ -83,14 +83,16 @@ const defaultRequestInterceptors = (config: InternalAxiosRequestConfig) => {
 }
 
 const defaultResponseInterceptors = (response: AxiosResponse<any>) => {
-  console.log(response)
+  console.log('response response', response)
+  const { data } = response
+  console.log('data', data)
   if (response?.config?.responseType === 'blob') {
     // 如果是文件流，直接过
     return response
   } else if (response.data.code === config.code) {
     return response.data
   } else {
-    ElMessage.error(response.data.message)
+    ElMessage.error(data.msg)
   }
 }
 ;(error: AxiosError) => {
