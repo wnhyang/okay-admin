@@ -1,5 +1,15 @@
 import { isArray, isObject } from '@/utils/is'
 
+export const CACHE_KEY = {
+  IS_DARK: 'isDark',
+  USER: 'user',
+  LANG: 'lang',
+  THEME: 'theme',
+  LAYOUT: 'layout',
+  TOKEN: 'token',
+  ROLE_ROUTERS: 'roleRouters',
+  DICT_CACHE: 'dictCache'
+}
 export const useStorage = (type: 'sessionStorage' | 'localStorage' = 'sessionStorage') => {
   const setStorage = (key: string, value: any) => {
     window[type].setItem(key, isArray(value) || isObject(value) ? JSON.stringify(value) : value)

@@ -7,6 +7,7 @@ import {
 } from './types'
 import { ElMessage } from 'element-plus'
 import qs from 'qs'
+import { getToken } from '@/utils/auth'
 
 const config: AxiosConfig = {
   /**
@@ -53,9 +54,22 @@ const config: AxiosConfig = {
     // }
   }
 }
+// 请求白名单，无须token的接口
+const whiteList: string[] = ['/login', '/refresh-token']
 
 const defaultRequestInterceptors = (config: InternalAxiosRequestConfig) => {
   console.log('request config', config)
+  // 是否需要设置 token
+  let isToken = (config!.headers || {}).isToken === false
+  whiteList.some((v) => {
+    if (config.url) {
+      config.url.indexOf(v) > -1
+      return (isToken = false)
+    }
+  })
+  if (getToken() && !isToken) {
+    ;(config as Recordable).headers.Authorization = 'Bearer ' + getToken() // 让每个请求携带自定义token
+  }
   if (
     config.method === 'post' &&
     (config.headers as AxiosRequestHeaders)['Content-Type'] === 'application/x-www-form-urlencoded'

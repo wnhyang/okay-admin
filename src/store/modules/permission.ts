@@ -1,8 +1,12 @@
 import { defineStore } from 'pinia'
-import { asyncRouterMap, constantRouterMap } from '@/router'
-import { generateRoutesFn1, generateRoutesFn2, flatMultiLevelRoutes } from '@/utils/routerHelper'
-import { store } from '../index'
+import { constantRouterMap } from '@/router'
+import { generateRoutesByServer, flatMultiLevelRoutes } from '@/utils/routerHelper'
+import { useStorage } from '@/hooks/web/useStorage'
+import { store } from '@/store'
 import { cloneDeep } from 'lodash-es'
+import { CACHE_KEY } from '@/hooks/web/useStorage'
+
+const { getStorage } = useStorage()
 
 export interface PermissionState {
   routers: AppRouteRecordRaw[]
@@ -33,22 +37,15 @@ export const usePermissionStore = defineStore('permission', {
     }
   },
   actions: {
-    generateRoutes(
-      type: 'admin' | 'test' | 'none',
-      routers?: AppCustomRouteRecordRaw[] | string[]
-    ): Promise<unknown> {
-      return new Promise<void>((resolve) => {
-        let routerMap: AppRouteRecordRaw[] = []
-        if (type === 'admin') {
-          // 模拟后端过滤菜单
-          routerMap = generateRoutesFn2(routers as AppCustomRouteRecordRaw[])
-        } else if (type === 'test') {
-          // 模拟前端过滤菜单
-          routerMap = generateRoutesFn1(cloneDeep(asyncRouterMap), routers as string[])
-        } else {
-          // 直接读取静态路由表
-          routerMap = cloneDeep(asyncRouterMap)
+    async generateRoutes(): Promise<unknown> {
+      return new Promise<void>(async (resolve) => {
+        let res: AppCustomRouteRecordRaw[] = []
+        if (getStorage(CACHE_KEY.ROLE_ROUTERS)) {
+          res = getStorage(CACHE_KEY.ROLE_ROUTERS) as AppCustomRouteRecordRaw[]
         }
+        const routerMap: AppRouteRecordRaw[] = generateRoutesByServer(
+          res as AppCustomRouteRecordRaw[]
+        )
         // 动态路由，404一定要放到最后面
         this.addRouters = routerMap.concat([
           {

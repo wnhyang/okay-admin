@@ -1,11 +1,16 @@
-import { useStorage } from '@/hooks/web/useStorage'
-import { useAppStore } from '@/store/modules/app'
-import {UserType} from "@/api/login/types";
+import { CACHE_KEY, useStorage } from '@/hooks/web/useStorage'
 
-const appStore = useAppStore()
+const { setStorage, getStorage, removeStorage } = useStorage()
 
-const { setStorage } = useStorage()
+export const setToken = (token: string) => {
+  setStorage(CACHE_KEY.TOKEN, token)
+}
 
-export const setToken = (token: UserType extends any ? UserType : any) => {
-  setStorage(appStore.token, token)
+export const getToken = () => {
+  return getStorage(CACHE_KEY.TOKEN)
+}
+
+// 删除token
+export const removeToken = () => {
+  removeStorage(CACHE_KEY.TOKEN)
 }

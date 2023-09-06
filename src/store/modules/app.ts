@@ -32,13 +32,11 @@ interface AppState {
   footer: boolean
   theme: ThemeTypes
   fixedMenu: boolean
-  token: string
 }
 
 export const useAppStore = defineStore('app', {
   state: (): AppState => {
     return {
-      token: 'token',
       userInfo: 'userInfo', // 登录信息存储字段-建议每个项目换一个字段，避免与其它项目冲突
       sizeMap: ['default', 'large', 'small'],
       mobile: false, // 是否是移动端

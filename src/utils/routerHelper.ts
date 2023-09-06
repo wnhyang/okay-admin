@@ -39,7 +39,7 @@ export const getRawRoute = (route: RouteLocationNormalized): RouteLocationNormal
 }
 
 // 前端控制路由生成
-export const generateRoutesFn1 = (
+export const generateRoutesByFrontEnd = (
   routes: AppRouteRecordRaw[],
   keys: string[],
   basePath = '/'
@@ -79,7 +79,11 @@ export const generateRoutesFn1 = (
 
     // recursive child routes
     if (route.children && data) {
-      data.children = generateRoutesFn1(route.children, keys, pathResolve(basePath, data.path))
+      data.children = generateRoutesByFrontEnd(
+        route.children,
+        keys,
+        pathResolve(basePath, data.path)
+      )
     }
     if (data) {
       res.push(data as AppRouteRecordRaw)
@@ -89,7 +93,7 @@ export const generateRoutesFn1 = (
 }
 
 // 后端控制路由生成
-export const generateRoutesFn2 = (routes: AppCustomRouteRecordRaw[]): AppRouteRecordRaw[] => {
+export const generateRoutesByServer = (routes: AppCustomRouteRecordRaw[]): AppRouteRecordRaw[] => {
   const res: AppRouteRecordRaw[] = []
 
   for (const route of routes) {
@@ -106,13 +110,12 @@ export const generateRoutesFn2 = (routes: AppCustomRouteRecordRaw[]): AppRouteRe
         console.error(`未找到${route.component}.vue文件或${route.component}.tsx文件，请创建`)
       } else {
         // 动态加载路由文件，可根据实际情况进行自定义逻辑
-        data.component =
-          component === '#' ? Layout : component.includes('##') ? getParentLayout() : comModule
+        data.component = route.parentId === 0 ? Layout : comModule
       }
     }
     // recursive child routes
     if (route.children) {
-      data.children = generateRoutesFn2(route.children)
+      data.children = generateRoutesByServer(route.children)
     }
     res.push(data as AppRouteRecordRaw)
   }
