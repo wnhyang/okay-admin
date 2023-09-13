@@ -75,6 +75,43 @@ export const constantRouterMap: AppRouteRecordRaw[] = [
     ]
   },
   {
+    path: '/system',
+    component: Layout,
+    redirect: '/system/user',
+    name: 'System',
+    meta: {
+      title: t('router.authorization'),
+      icon: 'eos-icons:role-binding',
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: 'user',
+        component: () => import('@/views/System/User/User.vue'),
+        name: 'User',
+        meta: {
+          title: t('router.user')
+        }
+      },
+      {
+        path: 'menu',
+        component: () => import('@/views/System/Menu/Menu.vue'),
+        name: 'Menu',
+        meta: {
+          title: t('router.menuManagement')
+        }
+      },
+      {
+        path: 'role',
+        component: () => import('@/views/System/Role/Role.vue'),
+        name: 'Role',
+        meta: {
+          title: t('router.role')
+        }
+      }
+    ]
+  },
+  {
     path: '/login',
     component: () => import('@/views/Login/Login.vue'),
     name: 'Login',

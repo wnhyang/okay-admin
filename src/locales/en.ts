@@ -506,6 +506,7 @@ export default {
     superiorDepartment: 'Superior department'
   },
   menu: {
+    parentId: 'Parent Menu',
     menuName: 'Menu name',
     icon: 'Icon',
     // 权限

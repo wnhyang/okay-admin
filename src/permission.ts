@@ -19,7 +19,7 @@ router.beforeEach(async (to, from, next) => {
   start()
   loadStart()
   if (getToken()) {
-    console.log(getToken())
+    console.log('token', getToken())
     if (to.path === '/login') {
       next({ path: '/' })
     } else {

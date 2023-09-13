@@ -501,6 +501,7 @@ export default {
     superiorDepartment: '上级部门'
   },
   menu: {
+    parentId: '父菜单',
     menuName: '菜单名称',
     icon: '图标',
     permission: '权限标识',
