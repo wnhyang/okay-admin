@@ -65,6 +65,13 @@ declare global {
   }
 
   declare interface AppCustomRouteRecordRaw extends Omit<RouteRecordRaw, 'meta'> {
+    hidden?: boolean
+    alwaysShow?: boolean
+    title?: string
+    icon?: string
+    noCache?: boolean
+    canTo?: boolean
+    permission?: string[]
     name: string
     meta: RouteMeta
     component: string

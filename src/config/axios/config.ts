@@ -58,7 +58,6 @@ const config: AxiosConfig = {
 const whiteList: string[] = ['/login', '/refresh-token']
 
 const defaultRequestInterceptors = (config: InternalAxiosRequestConfig) => {
-  console.log('request config', config)
   // 是否需要设置 token
   let isToken = (config!.headers || {}).isToken === false
   whiteList.some((v) => {
@@ -97,9 +96,7 @@ const defaultRequestInterceptors = (config: InternalAxiosRequestConfig) => {
 }
 
 const defaultResponseInterceptors = (response: AxiosResponse<any>) => {
-  console.log('response response', response)
   const { data } = response
-  console.log('data', data)
   if (response?.config?.responseType === 'blob') {
     // 如果是文件流，直接过
     return response

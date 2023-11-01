@@ -5,7 +5,6 @@ import { PropType, reactive, watch, ref, unref, nextTick } from 'vue'
 import { useValidator } from '@/hooks/web/useValidator'
 import { useI18n } from '@/hooks/web/useI18n'
 import { ElTree, ElCheckboxGroup, ElCheckbox } from 'element-plus'
-import { getMenuListApi } from 'src/api/system/menu'
 import { filter, eachTree } from '@/utils/tree'
 import { findIndex } from '@/utils'
 
@@ -117,7 +116,7 @@ const { setValues, getFormData, getElFormExpose } = formMethods
 
 const treeData = ref([])
 const getMenuList = async () => {
-  const res = await getMenuListApi(queryParams)
+  const res = await getMenuList(queryParams)
   if (res) {
     treeData.value = res.data.list
     if (!props.currentRow) return

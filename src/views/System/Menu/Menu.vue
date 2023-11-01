@@ -1,6 +1,6 @@
 <script setup lang="tsx">
 import { reactive, ref, unref } from 'vue'
-import { getMenuListApi } from '@/api/system/menu'
+import { deleteMenu, getMenuList } from '@/api/system/menu'
 import { useTable } from '@/hooks/web/useTable'
 import { useI18n } from '@/hooks/web/useI18n'
 import { Table, TableColumn } from '@/components/Table'
@@ -11,6 +11,7 @@ import { FormSchema } from '@/components/Form'
 import { ContentWrap } from '@/components/ContentWrap'
 import Write from './components/Write.vue'
 import { Dialog } from '@/components/Dialog'
+import * as MenuApi from '@/api/system/menu'
 
 const { t } = useI18n()
 
@@ -20,15 +21,19 @@ const queryParams = reactive({
 })
 const { tableRegister, tableState, tableMethods } = useTable({
   fetchDataApi: async () => {
-    const res = await getMenuListApi(queryParams)
+    const res = await getMenuList(queryParams)
     return {
       list: res.data || []
     }
+  },
+  fetchDelApi: async () => {
+    const res = await deleteMenu(unref(id))
+    return !!res
   }
 })
 
 const { dataList, loading } = tableState
-const { getList } = tableMethods
+const { getList, delList } = tableMethods
 
 const tableColumns = reactive<TableColumn[]>([
   {
@@ -37,15 +42,15 @@ const tableColumns = reactive<TableColumn[]>([
     type: 'index'
   },
   {
-    field: 'meta.title',
+    field: 'title',
     label: t('menu.menuName')
   },
   {
-    field: 'meta.icon',
+    field: 'icon',
     label: t('menu.icon'),
     slots: {
       default: (data: any) => {
-        const icon = data.row.meta.icon
+        const icon = data.row.icon
         if (icon) {
           return (
             <>
@@ -59,11 +64,11 @@ const tableColumns = reactive<TableColumn[]>([
     }
   },
   {
-    field: 'meta.permission',
+    field: 'permission',
     label: t('menu.permission'),
     slots: {
       default: (data: any) => {
-        const permission = data.row.meta.permission
+        const permission = data.row.permission
         return permission ? <>{permission.join(', ')}</> : null
       }
     }
@@ -89,8 +94,8 @@ const tableColumns = reactive<TableColumn[]>([
       default: (data: any) => {
         return (
           <>
-            <ElTag type={data.row.status === 0 ? 'danger' : 'success'}>
-              {data.row.status === 1 ? t('userDemo.enable') : t('userDemo.disable')}
+            <ElTag type={data.row.status === 0 ? 'success' : 'danger'}>
+              {data.row.status === 0 ? t('userDemo.enable') : t('userDemo.disable')}
             </ElTag>
           </>
         )
@@ -109,7 +114,9 @@ const tableColumns = reactive<TableColumn[]>([
             <ElButton type="primary" onClick={() => action(row, 'edit')}>
               {t('exampleDemo.edit')}
             </ElButton>
-            <ElButton type="danger">{t('exampleDemo.del')}</ElButton>
+            <ElButton type="danger" onClick={() => delData(row)}>
+              {t('exampleDemo.del')}
+            </ElButton>
           </>
         )
       }
@@ -119,7 +126,7 @@ const tableColumns = reactive<TableColumn[]>([
 
 const searchSchema = reactive<FormSchema[]>([
   {
-    field: 'meta.title',
+    field: 'title',
     label: t('menu.menuName'),
     component: 'Input'
   }
@@ -155,17 +162,39 @@ const AddAction = () => {
   actionType.value = ''
 }
 
+const delLoading = ref(false)
+const id = ref<number>(-1)
+
+const delData = async (row?: any) => {
+  delLoading.value = true
+  id.value = row.id
+
+  await delList(row.id).finally(() => {
+    delLoading.value = false
+  })
+}
+
 const save = async () => {
-  console.log(writeRef)
   const write = unref(writeRef)
-  console.log(write)
   const formData = await write?.submit()
   if (formData) {
     saveLoading.value = true
-    setTimeout(() => {
+    try {
+      let res
+      if (actionType.value === 'edit') {
+        res = await MenuApi.updateMenu(formData)
+      } else {
+        res = await MenuApi.createMenu(formData)
+      }
+      if (res) {
+        await getList()
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
       saveLoading.value = false
       dialogVisible.value = false
-    }, 1000)
+    }
   }
 }
 </script>

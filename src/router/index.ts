@@ -8,15 +8,6 @@ const { t } = useI18n()
 
 export const constantRouterMap: AppRouteRecordRaw[] = [
   {
-    path: '/',
-    component: Layout,
-    redirect: '/dashboard/analysis',
-    name: 'Root',
-    meta: {
-      hidden: true
-    }
-  },
-  {
     path: '/redirect',
     component: Layout,
     name: 'Redirect',

@@ -43,9 +43,11 @@ export const usePermissionStore = defineStore('permission', {
         if (getStorage(CACHE_KEY.ROLE_ROUTERS)) {
           res = getStorage(CACHE_KEY.ROLE_ROUTERS) as AppCustomRouteRecordRaw[]
         }
+        console.log('generateRoute', res)
         const routerMap: AppRouteRecordRaw[] = generateRoutesByServer(
           res as AppCustomRouteRecordRaw[]
         )
+        console.log('routerMap', routerMap)
         // 动态路由，404一定要放到最后面
         this.addRouters = routerMap.concat([
           {
@@ -60,6 +62,7 @@ export const usePermissionStore = defineStore('permission', {
         ])
         // 渲染菜单的所有路由
         this.routers = cloneDeep(constantRouterMap).concat(routerMap)
+        console.log('this.routers', this.routers)
         resolve()
       })
     },

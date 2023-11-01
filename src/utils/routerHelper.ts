@@ -7,7 +7,7 @@ import type {
   RouteRecordRaw
 } from 'vue-router'
 import { isUrl } from '@/utils/is'
-import { omit, cloneDeep } from 'lodash-es'
+import { omit, cloneDeep, camelCase } from 'lodash-es'
 
 const modules = import.meta.glob('../views/**/*.{vue,tsx}')
 
@@ -97,23 +97,38 @@ export const generateRoutesByServer = (routes: AppCustomRouteRecordRaw[]): AppRo
   const res: AppRouteRecordRaw[] = []
 
   for (const route of routes) {
+    const meta: RouteMeta = {
+      hidden: route.hidden,
+      alwaysShow: route.alwaysShow,
+      title: route.title,
+      icon: route.icon,
+      noCache: route.noCache,
+      canTo: route.canTo,
+      permission: route.permission
+    }
+
     const data: AppRouteRecordRaw = {
       path: route.path,
-      name: route.name,
+      name: route.name !== null && route.name.length > 0 ? route.name : camelCase(route.path),
       redirect: route.redirect,
-      meta: route.meta
+      meta: meta
     }
     if (route.component) {
-      const comModule = modules[`../${route.component}.vue`] || modules[`../${route.component}.tsx`]
-      const component = route.component as string
-      if (!comModule && !component.includes('#')) {
+      const comModule =
+        modules[`../views/${route.component}.vue`] || modules[`../views/${route.component}.tsx`]
+      if (!comModule) {
         console.error(`未找到${route.component}.vue文件或${route.component}.tsx文件，请创建`)
       } else {
         // 动态加载路由文件，可根据实际情况进行自定义逻辑
-        data.component = route.parentId === 0 ? Layout : comModule
+        data.component = comModule
+      }
+    } else {
+      data.component = Layout
+      if (isUrl(route.path)) {
+        data.path = '/external-link'
       }
     }
-    // recursive child routes
+    // recursive child routesf
     if (route.children) {
       data.children = generateRoutesByServer(route.children)
     }

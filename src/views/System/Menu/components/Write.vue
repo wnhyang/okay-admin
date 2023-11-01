@@ -5,8 +5,8 @@ import { PropType, reactive, ref, watch } from 'vue'
 import { useValidator } from '@/hooks/web/useValidator'
 import { useI18n } from '@/hooks/web/useI18n'
 import * as MenuApi from '@/api/system/menu'
-import { listToTree } from '@/utils/tree'
 import { MenuVO } from '@/api/system/menu'
+import { listToTree } from '@/utils/tree'
 
 const { t } = useI18n()
 
@@ -24,9 +24,9 @@ const getTree = async () => {
   menuTree.value = []
   const res = await MenuApi.getSimpleMenusList()
   if (res) {
-    menuTree.value.push({ id: 0, name: '根目录', children: listToTree(res.data) })
+    menuTree.value.push({ id: 0, title: '根目录', children: listToTree(res.data) })
   } else {
-    menuTree.value.push({ id: 0, name: '根目录' })
+    menuTree.value.push({ id: 0, title: '根目录' })
   }
 }
 getTree()
@@ -41,21 +41,89 @@ const formSchema = reactive<FormSchema[]>([
       nodeKey: 'id',
       props: {
         value: 'id',
-        label: 'name',
+        label: 'title',
         children: 'children'
-      }
+      },
+      defaultExpandedKeys: [0],
+      checkStrictly: true
     }
   },
   {
-    field: 'meta.title',
+    field: 'title',
     label: t('menu.menuName'),
     component: 'Input'
   },
   {
+    field: 'type',
+    label: '菜单类型',
+    component: 'RadioButton',
+    componentProps: {
+      options: [
+        {
+          label: '目录',
+          value: 1
+        },
+        {
+          label: '菜单',
+          value: 2
+        },
+        {
+          label: '按钮',
+          value: 3
+        }
+      ],
+      on: {
+        change: (value: number) => {
+          setSchema([
+            {
+              field: 'component',
+              path: 'remove',
+              value: value !== 2
+            },
+            {
+              field: 'name',
+              path: 'remove',
+              value: value !== 2
+            },
+            {
+              field: 'icon',
+              path: 'remove',
+              value: value === 3
+            },
+            {
+              field: 'path',
+              path: 'remove',
+              value: value === 3
+            },
+            {
+              field: 'permission',
+              path: 'remove',
+              value: value === 1
+            },
+            {
+              field: 'hidden',
+              path: 'remove',
+              value: value === 3
+            },
+            {
+              field: 'alwaysShow',
+              path: 'remove',
+              value: value === 3
+            },
+            {
+              field: 'onCache',
+              path: 'remove',
+              value: value !== 2
+            }
+          ])
+        }
+      }
+    }
+  },
+  {
     field: 'component',
     label: t('menu.component'),
-    component: 'Input',
-    remove: `meta.title`.endsWith(String(2))
+    component: 'Input'
   },
   {
     field: 'name',
@@ -63,7 +131,7 @@ const formSchema = reactive<FormSchema[]>([
     component: 'Input'
   },
   {
-    field: 'meta.icon',
+    field: 'icon',
     label: t('menu.icon'),
     component: 'Input'
   },
@@ -80,11 +148,11 @@ const formSchema = reactive<FormSchema[]>([
       options: [
         {
           label: t('userDemo.disable'),
-          value: 0
+          value: 1
         },
         {
           label: t('userDemo.enable'),
-          value: 1
+          value: 0
         }
       ]
     }
@@ -106,22 +174,34 @@ const formSchema = reactive<FormSchema[]>([
         {
           label: 'delete',
           value: 'delete'
+        },
+        {
+          label: 'query',
+          value: 'query'
+        },
+        {
+          label: 'import',
+          value: 'import'
+        },
+        {
+          label: 'export',
+          value: 'export'
         }
       ]
     }
   },
   {
-    field: 'meta.hidden',
+    field: 'hidden',
     label: t('menu.hidden'),
     component: 'Switch'
   },
   {
-    field: 'meta.alwaysShow',
+    field: 'alwaysShow',
     label: t('menu.alwaysShow'),
     component: 'Switch'
   },
   {
-    field: 'meta.noCache',
+    field: 'noCache',
     label: t('menu.noCache'),
     component: 'Switch'
   },
@@ -136,11 +216,11 @@ const rules = reactive({
   parentId: [required()],
   component: [required()],
   path: [required()],
-  'meta.title': [required()]
+  title: [required()]
 })
 
 const { formRegister, formMethods } = useForm()
-const { setValues, getFormData, getElFormExpose } = formMethods
+const { setValues, setSchema, getFormData, getElFormExpose } = formMethods
 
 const submit = async () => {
   const elForm = await getElFormExpose()
@@ -148,10 +228,7 @@ const submit = async () => {
     console.log(err)
   })
   if (valid) {
-    const formData = await getFormData<MenuVO>()
-    console.log(formData)
-    await MenuApi.createMenu(formData)
-    return formData
+    return await getFormData<MenuVO>()
   }
 }
 
